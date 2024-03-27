@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Online Content Monitoring Demo</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+      }
+
+      h1,
+      h2 {
+        color: #333;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 5px;
+      }
+
+      input[type="text"],
+      input[type="file"],
+      button {
+        margin-bottom: 10px;
+      }
+
+      button {
+        padding: 5px 10px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      #crawl-result,
+      #ocr-result {
+        margin-top: 10px;
+      }
+
+      #url-list {
+        list-style-type: none;
+        padding: 0;
+      }
+
+      #url-list li {
+        margin-bottom: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Online Content Monitoring Demo</h1>
+
+    <h2>Web Crawling</h2>
+    <label for="crawl-url">Enter URL to Crawl:</label>
+    <input type="text" id="crawl-url" />
+    <button onclick="crawl()">Crawl URL</button>
+    <div id="crawl-result"></div>
+
+    <h2>OCR</h2>
+    <input type="file" id="ocr-image" />
+    <button onclick="performOCR()">Perform OCR</button>
+    <div id="ocr-result"></div>
+
+    <h2>URLs</h2>
+    <button onclick="getURLs()">Get URLs</button>
+    <ul id="url-list"></ul>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      function crawl() {
+        var url = $("#crawl-url").val();
+        $.get("/crawl?url=" + url, function (data) {
+          $("#crawl-result").text(data);
+        });
+      }
+
+      function performOCR() {
+        var formData = new FormData();
+        formData.append("image", $("#ocr-image")[0].files[0]);
+        $.ajax({
+          url: "/ocr",
+          type: "POST",
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function (data) {
+            $("#ocr-result").text(data);
+          },
+        });
+      }
+
+      function getURLs() {
+        $.get("/urls", function (data) {
+          $("#url-list").empty();
+          data.urls.forEach(function (url) {
+            $("#url-list").append(
+              "<li>" + url.url + " (" + url.hash_value + ")</li>"
+            );
+          });
+        });
+      }
+    </script>
+  </body>
+</html>
